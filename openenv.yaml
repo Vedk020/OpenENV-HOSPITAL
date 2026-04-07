@@ -22,19 +22,44 @@ tasks:
 
 action:
   type: object
+  required:
+    - type
   properties:
     type:
       type: string
+      enum:
+        - assign_doctor
+        - send_to_icu
+        - wait
     patient_id:
       type: integer
+      description: ID of target patient (required for assign_doctor and send_to_icu)
 
 observation:
   type: object
+  required:
+    - patients
+    - available_doctors
+    - available_icu_beds
+    - current_step
+    - max_steps
+    - treated_count
+    - waiting_count
+    - treating_count
+    - total_patients
+    - done
+    - available_actions
+    - action_space
   properties:
     patients:
       type: array
       items:
         type: object
+        required:
+          - id
+          - severity
+          - wait_time
+          - status
         properties:
           id:
             type: integer
@@ -44,6 +69,11 @@ observation:
             type: integer
           status:
             type: string
+            enum:
+              - waiting
+              - treating
+              - treated
+              - icu
           treatment_timer:
             type: integer
     available_doctors:

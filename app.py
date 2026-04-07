@@ -1,11 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
 from pydantic import BaseModel
 from typing import Any, Optional
 from env import HospitalEnv
 
-app = FastAPI()
+app = FastAPI(title="HospitalEnv", description="OpenEnv Hospital Triage Environment")
 
-# Global instance initialized natively
+# Global instance — reused across resets (not destroyed)
 env_instance = HospitalEnv()
 
 class ResetRequest(BaseModel):
@@ -18,7 +18,7 @@ class ActionRequest(BaseModel):
     action: dict[str, Any]
 
 @app.post("/reset")
-def reset_env(req: ResetRequest = None):
+def reset_env(req: Optional[ResetRequest] = Body(default=None)):
     global env_instance
     
     # If the evaluator specifies task configs during reset
