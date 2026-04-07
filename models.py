@@ -66,18 +66,18 @@ class ResetRequest(BaseModel):
 
 class ActionRequest(BaseModel):
     """Body for POST /step — wraps the agent's action."""
-    action: dict[str, Any]
+    action: Action
 
 
 class ResetResponse(BaseModel):
     """Response from POST /reset."""
-    observation: dict[str, Any]
+    observation: Observation
     done: bool = False
 
 
 class StepResponse(BaseModel):
     """Response from POST /step — includes info dict per OpenEnv spec."""
-    observation: dict[str, Any]
+    observation: Observation
     reward: float
     done: bool
     info: dict[str, Any] = {}
@@ -85,4 +85,4 @@ class StepResponse(BaseModel):
 
 class StateResponse(BaseModel):
     """Response from GET|POST /state."""
-    observation: dict[str, Any]
+    observation: Observation
