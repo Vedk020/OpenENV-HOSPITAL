@@ -1,0 +1,70 @@
+name: HospitalEnv
+description: Hospital Triage Environment handling patients with constraints
+
+tasks:
+  easy:
+    description: Basic prioritization with fewer patients and sufficient resources.
+    num_patients: 4
+    num_doctors: 3
+    icu_beds: 2
+
+  medium:
+    description: Resource trade-offs with more patients of mixed severity and limited doctors.
+    num_patients: 8
+    num_doctors: 2
+    icu_beds: 1
+
+  hard:
+    description: High pressure optimization. Cluster of highly critical patients, highly limited resources.
+    num_patients: 15
+    num_doctors: 2
+    icu_beds: 1
+
+action:
+  type: object
+  properties:
+    type:
+      type: string
+    patient_id:
+      type: integer
+
+observation:
+  type: object
+  properties:
+    patients:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+          severity:
+            type: integer
+          wait_time:
+            type: integer
+          status:
+            type: string
+          treatment_timer:
+            type: integer
+    available_doctors:
+      type: integer
+    available_icu_beds:
+      type: integer
+    current_step:
+      type: integer
+    max_steps:
+      type: integer
+    treated_count:
+      type: integer
+    waiting_count:
+      type: integer
+    treating_count:
+      type: integer
+    total_patients:
+      type: integer
+    done:
+      type: boolean
+    available_actions:
+      type: array
+    action_space:
+      type: object
