@@ -19,13 +19,13 @@ from openai import OpenAI
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", os.getenv("HF_TOKEN", ""))
+HF_TOKEN = os.getenv("HF_TOKEN", "")
 
 # ── OpenAI Client (REQUIRED — used for ALL agent decisions) ────────────────
 
 client = OpenAI(
     base_url=API_BASE_URL,
-    api_key=OPENAI_API_KEY if OPENAI_API_KEY else "dummy-key",
+    api_key=HF_TOKEN if HF_TOKEN else "dummy-key",
 )
 
 # ── Environment Server URL (local Docker container) ────────────────────────
@@ -199,7 +199,7 @@ def run_inference():
             rewards.append(reward)
 
             # ── [STEP] ─────────────────────────────────────────────────
-            print(f"[STEP] step={step_count} action={json.dumps(action)} reward={reward} done={done}")
+            print(f"[STEP] step={step_count} action={json.dumps(action)} reward={reward} done={done} error=None")
 
             # Safety: prevent infinite loops
             if step_count > 100:
@@ -211,7 +211,7 @@ def run_inference():
         success = done and (obs.get("treated_count", 0) == obs.get("total_patients", 0))
 
         # ── [END] ──────────────────────────────────────────────────────
-        print(f"[END] success={success} steps={step_count} score={score}")
+        print(f"[END] success={success} steps={step_count} score={score} rewards={rewards}")
 
 
 if __name__ == "__main__":
