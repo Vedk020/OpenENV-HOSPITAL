@@ -93,7 +93,7 @@ def grade_episode(
         action = agent_fn(obs)
         actions_taken.append(copy.deepcopy(action))
 
-        obs, reward, done = env.step(action)
+        obs, reward, done, info = env.step(action)
 
         # ── Validate reward normalization ───────────────────────────────
         if not (0.0 <= reward <= 1.0):
@@ -178,7 +178,7 @@ def validate_env(
 
     if waiting:
         # Test assign_doctor
-        _, r, _ = test_env.step({"type": "assign_doctor", "patient_id": waiting[0]["id"]})
+        _, r, _, _ = test_env.step({"type": "assign_doctor", "patient_id": waiting[0]["id"]})
         if not (0.0 <= r <= 1.0):
             issues.append(f"REWARD_NORM: assign_doctor returned {r}")
 
@@ -187,12 +187,12 @@ def validate_env(
     waiting2 = [p for p in test_obs2["patients"] if p["status"] == "waiting"]
 
     if waiting2 and test_obs2["available_icu_beds"] > 0:
-        _, r, _ = test_env2.step({"type": "send_to_icu", "patient_id": waiting2[0]["id"]})
+        _, r, _, _ = test_env2.step({"type": "send_to_icu", "patient_id": waiting2[0]["id"]})
         if not (0.0 <= r <= 1.0):
             issues.append(f"REWARD_NORM: send_to_icu returned {r}")
 
     # Test wait
-    _, r, _ = test_env.step({"type": "wait"})
+    _, r, _, _ = test_env.step({"type": "wait"})
     if not (0.0 <= r <= 1.0):
         issues.append(f"REWARD_NORM: wait returned {r}")
 
@@ -214,7 +214,7 @@ def validate_env(
 
     for bad in bad_actions:
         try:
-            obs, r, d = safe_env.step(bad)
+            obs, r, d, _ = safe_env.step(bad)
             if not (0.0 <= r <= 1.0):
                 issues.append(f"STEP_SAFETY: bad action {bad!r} returned reward {r}")
             if not isinstance(obs, dict):
@@ -228,7 +228,7 @@ def validate_env(
     quick_env = HospitalEnv(num_patients=1, num_doctors=1, icu_beds=1, max_steps=50, seed=seed)
     qobs = quick_env.reset()
     pid = qobs["patients"][0]["id"]
-    _, _, done = quick_env.step({"type": "send_to_icu", "patient_id": pid})
+    _, _, done, _ = quick_env.step({"type": "send_to_icu", "patient_id": pid})
     if not done:
         issues.append("DONE: episode did not end after all patients treated")
 
@@ -245,7 +245,7 @@ def validate_env(
     # Create an impossible scenario: 0 doctors, 0 ICU, patients waiting
     stale_env = HospitalEnv(num_patients=3, num_doctors=0, icu_beds=0, max_steps=100, seed=seed)
     stale_obs = stale_env.reset()
-    _, _, stale_done = stale_env.step({"type": "wait"})
+    _, _, stale_done, _ = stale_env.step({"type": "wait"})
     if not stale_done:
         issues.append("STALEMATE: env did not terminate with 0 doctors + 0 icu beds")
 

@@ -276,7 +276,7 @@ class HospitalEnv:
     #  step(action)  — Prompts 4-7
     # ────────────────────────────────────────────────────────────────────────
 
-    def step(self, action: dict[str, Any]) -> tuple[dict[str, Any], float, bool]:
+    def step(self, action: dict[str, Any]) -> tuple[dict[str, Any], float, bool, dict[str, Any]]:
         """
         Apply *action* to the environment and advance one time-step.
 
@@ -291,6 +291,7 @@ class HospitalEnv:
         observation : dict   — updated state  (stable keys)
         reward      : float  — value in [0.0, 1.0]  (clamped)
         done        : bool   — True when the episode is over
+        info        : dict   — auxiliary diagnostics (action_valid, action_type, etc.)
 
         Safety
         ------
@@ -299,7 +300,7 @@ class HospitalEnv:
         """
         # ── Already done? Return terminal state. ────────────────────────────
         if self._done:
-            return self.state(), 0.0, True
+            return self.state(), 0.0, True, {"action_valid": False, "reason": "episode_already_done"}
 
         # ── FIX #7: Validate action — never crash ───────────────────────────
         action, valid = self._validate_action(action)
@@ -308,7 +309,7 @@ class HospitalEnv:
             self._tick()
             self.current_step += 1
             self._check_done()
-            return self.state(), 0.0, self._done
+            return self.state(), 0.0, self._done, {"action_valid": False, "reason": "invalid_action"}
 
         reward = 0.0
         action_type = action["type"]
@@ -333,7 +334,13 @@ class HospitalEnv:
         self._check_done()
 
         # ── FIX #3: Reward ALWAYS clamped to [0, 1] ─────────────────────────
-        return self.state(), _clamp_reward(reward), self._done
+        info = {
+            "action_valid": True,
+            "action_type": action_type,
+            "treated_count": self.treated_count,
+            "waiting_count": len([p for p in self.patients if p["status"] == "waiting"]),
+        }
+        return self.state(), _clamp_reward(reward), self._done, info
 
     # ────────────────────────────────────────────────────────────────────────
     #  Private helpers

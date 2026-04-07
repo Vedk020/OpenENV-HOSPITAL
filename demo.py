@@ -108,7 +108,7 @@ def main() -> None:
 
     while True:
         action = greedy_agent(obs)
-        obs, reward, done = env.step(action)
+        obs, reward, done, info = env.step(action)
         total_reward += reward
         step += 1
 
@@ -152,7 +152,7 @@ def main() -> None:
     all_safe = True
     for name, bad_action in bad_actions:
         try:
-            obs, r, d = safe_env.step(bad_action)
+            obs, r, d, _ = safe_env.step(bad_action)
             ok = 0.0 <= r <= 1.0 and isinstance(obs, dict) and isinstance(d, bool)
             symbol = "✅" if ok else "❌"
             if not ok:
@@ -169,7 +169,7 @@ def main() -> None:
     print("\n🔒 Stalemate test (0 doctors, 0 ICU beds)...")
     stale = HospitalEnv(num_patients=3, num_doctors=0, icu_beds=0, max_steps=100, seed=42)
     stale.reset()
-    _, _, stale_done = stale.step({"type": "wait"})
+    _, _, stale_done, _ = stale.step({"type": "wait"})
     print(f"  Done after 1 step: {'✅ YES (deadlock detected)' if stale_done else '❌ NO (stuck forever!)'}")
 
     # ── Phase 6: Grader report ─────────────────────────────────────────────
